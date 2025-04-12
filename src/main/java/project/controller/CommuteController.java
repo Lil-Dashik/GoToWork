@@ -1,6 +1,7 @@
 package project.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,27 +18,24 @@ import project.service.UserService;
 public class CommuteController {
     private final UserService userService;
     private final CommuteService commuteService;
+
     @Autowired
     public CommuteController(UserService userService, CommuteService commuteService) {
         this.userService = userService;
         this.commuteService = commuteService;
     }
+
     @PostMapping("/start")
-    public String startCommand( @RequestBody UserDetailsDTO userDetailsDTO) {
+    public String startCommand(@RequestBody UserDetailsDTO userDetailsDTO) {
         userService.saveUserData(userDetailsDTO);
         return "Данные сохранены";
     }
 
-//    @PostMapping("/goWork")
-//    public String handleCommuteRequest(@RequestBody CommuteRequestDTO commuteRequestDTO) {
-//        if (commuteRequestDTO.getUserDTO() == null || commuteRequestDTO.getUserDetailsDTO() == null) {
-//            return "Ошибка: данные пользователя не были переданы.";
-//        }
-//        UserDTO userDTO = commuteRequestDTO.getUserDTO();
-//        UserDetailsDTO userDetailsDTO = commuteRequestDTO.getUserDetailsDTO();
-//        userService.saveUserData(userDTO, userDetailsDTO);
-//        User user = userService.getUserByTelegramUserId(userDetailsDTO.getTelegramUserId());
-//        commuteService.calculateCommuteTime(user.getHomeAddress(), user.getWorkAddress(), user.getWorkStartTime());
-//        return "Данные сохранены и расчет времени выполнен!";
-//    }
+    @PostMapping("/goToWork")
+    public ResponseEntity<String> goToWork(@RequestBody UserDTO userDTO) {
+        System.out.println("Received user data: " + userDTO);
+        userService.saveUserWork(userDTO);
+        return ResponseEntity.ok("Время до работы рассчитано!");
+    }
+
 }
