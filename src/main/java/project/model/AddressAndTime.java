@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalTime;
 import java.util.Date;
 @Getter
 @Setter
@@ -15,12 +16,11 @@ public class AddressAndTime {
     private Long id;
     private String homeAddress;
     private String workAddress;
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date workStartTime;
+    private LocalTime workStartTime;
     @OneToOne(mappedBy = "addressAndTime")
     private User user;
     public AddressAndTime() {}
-    public AddressAndTime(String homeAddress, String workAddress, Date workStartTime) {
+    public AddressAndTime(String homeAddress, String workAddress, LocalTime workStartTime) {
         this.homeAddress = homeAddress;
         this.workAddress = workAddress;
         this.workStartTime = workStartTime;

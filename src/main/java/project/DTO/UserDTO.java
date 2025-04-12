@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalTime;
 import java.util.Date;
 @Getter
 @Setter
@@ -13,9 +14,9 @@ public class UserDTO {
     private Long telegramUserId;
     private String homeAddress;
     private String workAddress;
-    private Date workStartTime;
+    private LocalTime workStartTime;
     public UserDTO(){}
-    public UserDTO(String homeAddress, String workAddress, Date workStartTime, Long telegramUserId) {
+    public UserDTO(String homeAddress, String workAddress, LocalTime workStartTime, Long telegramUserId) {
         this.homeAddress = homeAddress;
         this.workAddress = workAddress;
         this.workStartTime = workStartTime;

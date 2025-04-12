@@ -17,6 +17,8 @@ import project.model.CommuteTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,7 +107,7 @@ public class CommuteBot extends TelegramLongPollingBot {
             String homeAddress = parts[0].trim();
             String workAddress = parts[1].trim();
             String workStartTimeStr = parts[2].trim();
-            Date workStartTime = parseTime(workStartTimeStr);
+            LocalTime workStartTime = parseTime(workStartTimeStr);
 
             UserDTO userDTO = new UserDTO();
             userDTO.setTelegramUserId(message.getFrom().getId());
@@ -126,13 +128,15 @@ public class CommuteBot extends TelegramLongPollingBot {
         }
     }
 
-    private Date parseTime(String time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    private LocalTime parseTime(String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+
         try {
-            return sdf.parse(time);  // Преобразуем строку времени в Date
-        } catch (ParseException e) {
+            // Парсим строку в объект LocalTime
+            return LocalTime.parse(time, formatter);
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return null;  // Возвращаем null в случае ошибки парсинга
         }
     }
 
