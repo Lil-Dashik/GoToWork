@@ -14,17 +14,13 @@ public class UserService {
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
-    public void saveUserData(UserDTO userDTO, UserDetailsDTO userDetailsDTO) {
+    public void saveUserData(UserDetailsDTO userDetailsDTO) {
         User user = new User();
-        user.setHomeAddress(userDTO.getHomeAddress());
-        user.setWorkAddress(userDTO.getWorkAddress());
-        user.setWorkStartTime(userDTO.getWorkStartTime());
 
         user.setTelegramUserId(userDetailsDTO.getTelegramUserId());
         user.setUsername(userDetailsDTO.getUsername());
         user.setFirstName(userDetailsDTO.getFirstName());
-        user.setLastName(userDetailsDTO.getLastName());
-        user.setTimeZone(userDetailsDTO.getTimeZone());
+//        user.setTimeZone(userDetailsDTO.getTimeZone());
 
         userRepository.save(user);
     }
