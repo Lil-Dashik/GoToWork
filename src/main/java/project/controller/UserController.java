@@ -14,18 +14,18 @@ import project.service.UserService;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/users")
-public class UserController {
-    private final UserService userService;
-    @Autowired
-   public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @PostMapping("/saveUser")
-    public String saveUserData(@RequestBody UserDTO userDTO, @RequestBody UserDetailsDTO userDetailsDTO) {
-        userService.saveUserData(userDTO, userDetailsDTO);
-        return "Данные успешно сохранены!";
-    }
-}
+//@RestController
+//@RequestMapping("/api/users")
+//public class UserController {
+//    private final UserService userService;
+//    @Autowired
+//   public UserController(UserService userService) {
+//        this.userService = userService;
+//    }
+//
+//    @PostMapping("/saveUser")
+//    public String saveUserData(@RequestBody UserDTO userDTO, @RequestBody UserDetailsDTO userDetailsDTO) {
+//        userService.saveUserData(userDTO, userDetailsDTO);
+//        return "Данные успешно сохранены!";
+//    }
+//}

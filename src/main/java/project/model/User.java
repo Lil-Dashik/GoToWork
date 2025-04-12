@@ -27,8 +27,7 @@ public class User {
     private boolean notificationEnabled = true;
     private String username;
     private String firstName;
-    private String lastName;
-    private String timeZone;
+//    private String timeZone;
 //    private String languageCode;
 
 //    @NotEmpty(message = "Name should not be empty")

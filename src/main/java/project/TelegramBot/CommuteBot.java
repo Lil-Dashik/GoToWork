@@ -10,15 +10,18 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import project.DTO.UserDetailsDTO;
 import project.configuration.BotConfig;
 
 @Component
 public class CommuteBot extends TelegramLongPollingBot {
     private final BotConfig config;
+    private final RestTemplate restTemplate;
 
     @Autowired
-    public CommuteBot(BotConfig config) {
+    public CommuteBot(BotConfig config, RestTemplate restTemplate) {
         this.config = config;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -31,6 +34,7 @@ public class CommuteBot extends TelegramLongPollingBot {
 
             if ("/start".equals(messageText)) {
                 sendStartMessage(chatId);
+                saveUserData(message);
             } else {
                 sendMessage(chatId, "Вы отправили: " + messageText);
             }
@@ -50,6 +54,15 @@ public class CommuteBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
+    }
+    private void saveUserData(Message message) {
+        UserDetailsDTO userDetailsDTO = new UserDetailsDTO(
+                message.getFrom().getId(),
+                message.getFrom().getUserName(),
+                message.getFrom().getFirstName()
+        );
+        String url = "http://localhost:8080/api/commute/start";
+        restTemplate.postForObject(url, userDetailsDTO, String.class);
     }
 
     private void sendMessage(Long chatId, String text) {
