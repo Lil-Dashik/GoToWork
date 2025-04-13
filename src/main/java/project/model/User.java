@@ -26,6 +26,9 @@ public class User {
     @OneToOne
     @JoinColumn(name = "address_and_time_id")
     private AddressAndTime addressAndTime;
+    @OneToOne
+    @JoinColumn(name="coordinates_id")
+    private UserCoordinates userCoordinates;
 //    private String timeZone;
 //    private String languageCode;
 }

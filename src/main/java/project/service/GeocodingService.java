@@ -1,54 +1,65 @@
 package project.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import project.model.Coordinates;
-import project.model.GeocodingResponse;
-import project.model.GeocodingSuggestion;
+import project.configuration.DadataConfig;
+import project.Dadata.GeocodingResponse;
+import project.Dadata.GeocodingSuggestion;
 
 import org.springframework.http.HttpHeaders;
+import project.model.Coordinates;
+import project.model.UserCoordinates;
+
+import java.util.List;
 
 @Service
 public class GeocodingService {
-    private static final String API_KEY = "079ab8ffc4cc858af3494978f47b670e5f5aa516";
-    private static final String GEOCODE_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/geolocate/address";
+    private static final Logger logger = LoggerFactory.getLogger(GeocodingService.class);
+    private final DadataConfig dadataConfig;
+    private static final String GEOCODE_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public GeocodingService(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public GeocodingService(RestTemplate restTemplate, ObjectMapper objectMapper, DadataConfig dadataConfig) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.dadataConfig = dadataConfig;
     }
     public Coordinates getCoordinates(String address) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Token " + API_KEY);
+        headers.add("Authorization", "Token " + dadataConfig.getDadataKey());
         headers.add("Content-Type", "application/json");
+        headers.add("Accept", "application/json");
+        headers.add("X-Secret", "7552d9b3d2427f38c46e09aca23633e161a39a60");
 
-        // Формируем запрос
-        String requestBody = "{\"query\": \"" + address + "\"}";
+        String requestBody =  "[\"" + address + "\"]";
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+        RestTemplate restTemplate = new RestTemplate();
+        logger.info("Request body: {}", requestBody);
+        logger.info("Request headers: {}", headers);
+        ResponseEntity<List<GeocodingResponse>> response = restTemplate.exchange(
+                GEOCODE_URL,
+                HttpMethod.POST,
+                entity,
+                new ParameterizedTypeReference<List<GeocodingResponse>>() {}
+        );
+        logger.info("Response status: {}", response.getStatusCode());
+        logger.info("Response body: {}", response.getBody());
+        if (response.getBody() != null && !response.getBody().isEmpty()) {
+            GeocodingResponse geocodingResponse = response.getBody().get(0);
 
-        // Отправляем запрос
-        ResponseEntity<String> response = restTemplate.postForEntity(GEOCODE_URL, entity, String.class);
-
-        // Обработка ответа
-        try {
-            GeocodingResponse geocodingResponse = objectMapper.readValue(response.getBody(), GeocodingResponse.class);
-            if (!geocodingResponse.getSuggestions().isEmpty()) {
-                GeocodingSuggestion suggestion = geocodingResponse.getSuggestions().get(0);
-                double lat = suggestion.getData().getGeoLat();
-                double lon = suggestion.getData().getGeoLon();
-                return new Coordinates(lat, lon);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            return new Coordinates(geocodingResponse.getGeo_lat(), geocodingResponse.getGeo_lon());
         }
         return null;
     }

@@ -3,10 +3,12 @@ package project.model;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.stereotype.Component;
 
 @Setter
 @Getter
 @ToString
+@Component
 public class Coordinates {
     private double latitude;
     private double longitude;
