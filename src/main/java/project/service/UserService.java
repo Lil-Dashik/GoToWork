@@ -23,9 +23,10 @@ public class UserService {
     private final GeocodingService geocodingService;
     private final UserCoordinatesRepository coordinatesRepository;
     private final Coordinates coordinates;
+
     @Autowired
     public UserService(UserRepository userRepository, AddressAndTimeRepository addressAndTimeRepository,
-                       UserCoordinatesService userCoordinatesService,GeocodingService geocodingService,
+                       UserCoordinatesService userCoordinatesService, GeocodingService geocodingService,
                        UserCoordinatesRepository coordinatesRepository, Coordinates coordinates) {
         this.userRepository = userRepository;
         this.addressAndTimeRepository = addressAndTimeRepository;
@@ -34,6 +35,7 @@ public class UserService {
         this.coordinatesRepository = coordinatesRepository;
         this.coordinates = coordinates;
     }
+
     public void saveUserData(UserDetailsDTO userDetailsDTO) {
         User user = new User();
 
@@ -44,6 +46,7 @@ public class UserService {
 
         userRepository.save(user);
     }
+
     public void saveUserWork(UserDTO userDTO) {
         Optional<User> userOpt = userRepository.findByTelegramUserId(userDTO.getTelegramUserId());
 
@@ -59,11 +62,13 @@ public class UserService {
             User user = userOpt.get();
             System.out.println("User:" + user.getTelegramUserId());
             user.setAddressAndTime(addressAndTime);
-            userCoordinatesService.saveCoordinates(userDTO.getTelegramUserId(), homeCoordinates, workCoordinates);
+            UserCoordinates newCoordinates = userCoordinatesService.saveCoordinates(userDTO.getTelegramUserId(), homeCoordinates, workCoordinates);
+            user.setUserCoordinates(newCoordinates);
             userRepository.save(user);
 
         }
     }
+
     public User getUserByTelegramUserId(Long telegramUserId) {
         Optional<User> userOpt = userRepository.findByTelegramUserId(telegramUserId);
         return userOpt.get();

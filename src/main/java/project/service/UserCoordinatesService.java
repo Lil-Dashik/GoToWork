@@ -21,7 +21,7 @@ public class UserCoordinatesService {
         this.userCoordinatesRepository = userCoordinatesRepository;
     }
 
-    public void saveCoordinates(Long telegramUserId, Coordinates homeCoordinates, Coordinates workCoordinates) {
+    public UserCoordinates saveCoordinates(Long telegramUserId, Coordinates homeCoordinates, Coordinates workCoordinates) {
         if (homeCoordinates != null && workCoordinates != null) {
             UserCoordinates newCoordinates = new UserCoordinates(
                     telegramUserId,
@@ -30,9 +30,10 @@ public class UserCoordinatesService {
                     workCoordinates.getLatitude(),
                     workCoordinates.getLongitude()
             );
-            userCoordinatesRepository.save(newCoordinates);
+            return userCoordinatesRepository.save(newCoordinates);
         } else {
             logger.error("Некоторые координаты не были получены (дом или работа).");
         }
+        return null;
     }
 }
