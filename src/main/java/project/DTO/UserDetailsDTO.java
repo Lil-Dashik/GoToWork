@@ -11,7 +11,6 @@ public class UserDetailsDTO {
     private Long telegramUserId;
     private String username;
     private String firstName;
-//    private String timeZone;
     public UserDetailsDTO() {}
     public UserDetailsDTO(Long telegramUserId, String username, String firstName) {
         this.telegramUserId = telegramUserId;

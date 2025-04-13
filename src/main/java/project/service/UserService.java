@@ -4,13 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.DTO.UserDTO;
 import project.DTO.UserDetailsDTO;
-import project.model.AddressAndTime;
+import project.model.*;
 
-import project.model.Coordinates;
-import project.model.User;
-import project.model.UserCoordinates;
 import project.repository.AddressAndTimeRepository;
-import project.repository.UserCoordinatesRepository;
 import project.repository.UserRepository;
 
 import java.util.Optional;
@@ -21,19 +17,14 @@ public class UserService {
     private final AddressAndTimeRepository addressAndTimeRepository;
     private final UserCoordinatesService userCoordinatesService;
     private final GeocodingService geocodingService;
-    private final UserCoordinatesRepository coordinatesRepository;
-    private final Coordinates coordinates;
 
     @Autowired
     public UserService(UserRepository userRepository, AddressAndTimeRepository addressAndTimeRepository,
-                       UserCoordinatesService userCoordinatesService, GeocodingService geocodingService,
-                       UserCoordinatesRepository coordinatesRepository, Coordinates coordinates) {
+                       UserCoordinatesService userCoordinatesService, GeocodingService geocodingService) {
         this.userRepository = userRepository;
         this.addressAndTimeRepository = addressAndTimeRepository;
         this.userCoordinatesService = userCoordinatesService;
         this.geocodingService = geocodingService;
-        this.coordinatesRepository = coordinatesRepository;
-        this.coordinates = coordinates;
     }
 
     public void saveUserData(UserDetailsDTO userDetailsDTO) {
@@ -42,8 +33,6 @@ public class UserService {
         user.setTelegramUserId(userDetailsDTO.getTelegramUserId());
         user.setUsername(userDetailsDTO.getUsername());
         user.setFirstName(userDetailsDTO.getFirstName());
-//        user.setTimeZone(userDetailsDTO.getTimeZone());
-
         userRepository.save(user);
     }
 
@@ -56,13 +45,19 @@ public class UserService {
         addressAndTime.setWorkStartTime(userDTO.getWorkStartTime());
         addressAndTimeRepository.save(addressAndTime);
 
-        Coordinates homeCoordinates = geocodingService.getCoordinates(userDTO.getHomeAddress());
-        Coordinates workCoordinates = geocodingService.getCoordinates(userDTO.getWorkAddress());
+        Location homeLocation = geocodingService.getCoordinates(userDTO.getHomeAddress());
+        Location workLocation = geocodingService.getCoordinates(userDTO.getWorkAddress());
+        Coordinates homeCoordinates = new Coordinates(homeLocation.getCoordinatesLat(), homeLocation.getCoordinatesLon());
+        Coordinates workCoordinates = new Coordinates(workLocation.getCoordinatesLat(), workLocation.getCoordinatesLon());
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             System.out.println("User:" + user.getTelegramUserId());
             user.setAddressAndTime(addressAndTime);
-            UserCoordinates newCoordinates = userCoordinatesService.saveCoordinates(userDTO.getTelegramUserId(), homeCoordinates, workCoordinates);
+            if (user.getTimeZone() == null){
+                user.setTimeZone(homeLocation.getTimeZone());
+            }
+            UserCoordinates newCoordinates = userCoordinatesService
+                    .saveCoordinates(userDTO.getTelegramUserId(), homeCoordinates, workCoordinates);
             user.setUserCoordinates(newCoordinates);
             userRepository.save(user);
 

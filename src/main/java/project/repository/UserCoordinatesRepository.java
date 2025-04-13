@@ -6,6 +6,7 @@ import project.model.UserCoordinates;
 
 import java.util.Optional;
 
+
 @Repository
 public interface UserCoordinatesRepository extends JpaRepository<UserCoordinates, Long> {
     Optional<UserCoordinates> findByTelegramUserId(Long telegramUserId);

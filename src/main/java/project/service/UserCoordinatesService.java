@@ -8,8 +8,6 @@ import project.model.Coordinates;
 import project.model.UserCoordinates;
 import project.repository.UserCoordinatesRepository;
 
-import java.util.Optional;
-
 @Service
 public class UserCoordinatesService {
     private static final Logger logger = LoggerFactory.getLogger(UserCoordinatesService.class);

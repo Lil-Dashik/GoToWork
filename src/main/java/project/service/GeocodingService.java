@@ -12,11 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import project.configuration.DadataConfig;
 import project.Dadata.GeocodingResponse;
-import project.Dadata.GeocodingSuggestion;
 
 import org.springframework.http.HttpHeaders;
-import project.model.Coordinates;
-import project.model.UserCoordinates;
+import project.model.Location;
 
 import java.util.List;
 
@@ -26,21 +24,17 @@ public class GeocodingService {
     private final DadataConfig dadataConfig;
     private static final String GEOCODE_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
 
-    private final RestTemplate restTemplate;
-    private final ObjectMapper objectMapper;
 
     @Autowired
-    public GeocodingService(RestTemplate restTemplate, ObjectMapper objectMapper, DadataConfig dadataConfig) {
-        this.restTemplate = restTemplate;
-        this.objectMapper = objectMapper;
+    public GeocodingService(DadataConfig dadataConfig) {
         this.dadataConfig = dadataConfig;
     }
-    public Coordinates getCoordinates(String address) {
+    public Location getCoordinates(String address) {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Token " + dadataConfig.getDadataKey());
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
-        headers.add("X-Secret", "7552d9b3d2427f38c46e09aca23633e161a39a60");
+        headers.add("X-Secret", dadataConfig.getDadataSecret());
 
         String requestBody =  "[\"" + address + "\"]";
 
@@ -58,8 +52,8 @@ public class GeocodingService {
         logger.info("Response body: {}", response.getBody());
         if (response.getBody() != null && !response.getBody().isEmpty()) {
             GeocodingResponse geocodingResponse = response.getBody().get(0);
+            return new Location(geocodingResponse.getGeo_lat(), geocodingResponse.getGeo_lon(), geocodingResponse.getTimeZone());
 
-            return new Coordinates(geocodingResponse.getGeo_lat(), geocodingResponse.getGeo_lon());
         }
         return null;
     }

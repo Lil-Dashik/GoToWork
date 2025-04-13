@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalTime;
-import java.util.Date;
 @Getter
 @Setter
 @Entity

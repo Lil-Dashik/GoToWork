@@ -1,8 +1,6 @@
 package project.TelegramBot;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -13,13 +11,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import project.DTO.UserDTO;
 import project.DTO.UserDetailsDTO;
 import project.configuration.BotConfig;
-import project.model.CommuteTime;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,7 +84,7 @@ public class CommuteBot extends TelegramLongPollingBot {
         message.setChatId(chatId.toString());
         message.setText(requestMessage);
         try {
-            execute(message); // Отправляем запрос
+            execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
@@ -100,7 +93,6 @@ public class CommuteBot extends TelegramLongPollingBot {
     private void saveUserDataWork(Message message) {
         String userInput = message.getText().trim();
 
-        // Разделяем строку по точке с запятой
         String[] parts = userInput.split(";");
 
         if (parts.length == 3) {
@@ -118,7 +110,7 @@ public class CommuteBot extends TelegramLongPollingBot {
             RestTemplate restTemplate = new RestTemplate();
             try {
                 restTemplate.postForObject(url, userDTO, String.class);
-                sendMessage(message.getChatId(), "Данные сохранены, расчет времени выполнен.");
+                sendMessage(message.getChatId(), "Отправим уведомление за 30 минут до выезда!");
             } catch (Exception e) {
                 e.printStackTrace();
                 sendMessage(message.getChatId(), "Произошла ошибка при расчете времени.");
@@ -132,11 +124,10 @@ public class CommuteBot extends TelegramLongPollingBot {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
         try {
-            // Парсим строку в объект LocalTime
             return LocalTime.parse(time, formatter);
         } catch (Exception e) {
             e.printStackTrace();
-            return null;  // Возвращаем null в случае ошибки парсинга
+            return null;
         }
     }
 

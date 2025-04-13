@@ -1,10 +1,7 @@
 package project.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -29,6 +26,5 @@ public class User {
     @OneToOne
     @JoinColumn(name="coordinates_id")
     private UserCoordinates userCoordinates;
-//    private String timeZone;
-//    private String languageCode;
+    private String timeZone;
 }

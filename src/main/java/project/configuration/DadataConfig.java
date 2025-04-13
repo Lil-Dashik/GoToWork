@@ -11,9 +11,12 @@ import org.springframework.context.annotation.Configuration;
 public class DadataConfig {
     @Value("${dadata.api.key}")
     private String dadataKey;
+    @Value("${dadata.api.secret}")
+    private String dadataSecret;
     public DadataConfig() {}
-    public DadataConfig(String dadataKey) {
+    public DadataConfig(String dadataKey, String dadataSecret) {
         this.dadataKey = dadataKey;
+        this.dadataSecret = dadataSecret;
     }
 
 }
