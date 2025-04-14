@@ -3,6 +3,8 @@ package project.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,4 +29,5 @@ public class User {
     @JoinColumn(name="coordinates_id")
     private UserCoordinates userCoordinates;
     private String timeZone;
+    private long TravelTime;
 }
