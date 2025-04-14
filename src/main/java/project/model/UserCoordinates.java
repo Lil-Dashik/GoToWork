@@ -3,6 +3,7 @@ package project.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import project.DTO.Coordinates;
 
 @Getter
 @Setter
@@ -44,6 +45,13 @@ public class UserCoordinates {
         this.homeLongitude = homeLongitude;
         this.workLatitude = workLatitude;
         this.workLongitude = workLongitude;
+    }
+    public Coordinates getHomeCoordinates() {
+        return new Coordinates(homeLatitude, homeLongitude);
+    }
+
+    public Coordinates getWorkCoordinates() {
+        return new Coordinates(workLatitude, workLongitude);
     }
 
 }

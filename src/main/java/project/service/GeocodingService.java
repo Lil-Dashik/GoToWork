@@ -1,6 +1,5 @@
 package project.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +13,7 @@ import project.configuration.DadataConfig;
 import project.Dadata.GeocodingResponse;
 
 import org.springframework.http.HttpHeaders;
-import project.model.Location;
+import project.DTO.Location;
 
 import java.util.List;
 

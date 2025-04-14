@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Duration;
+import java.time.LocalTime;
 
 @Getter
 @Setter
@@ -29,5 +30,5 @@ public class User {
     @JoinColumn(name="coordinates_id")
     private UserCoordinates userCoordinates;
     private String timeZone;
-    private long TravelTime;
+    private Long TravelTime;
 }

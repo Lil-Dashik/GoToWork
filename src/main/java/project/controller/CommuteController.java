@@ -2,23 +2,24 @@ package project.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import project.DTO.NotificationDTO;
 import project.DTO.UserDTO;
 import project.DTO.UserDetailsDTO;
 import project.service.CommuteService;
+import project.service.NotificationService;
 import project.service.UserService;
 
 @RestController
 @RequestMapping("/api/commute")
 public class CommuteController {
     private final UserService userService;
+    private final NotificationService notificationService;
 
     @Autowired
-    public CommuteController(UserService userService) {
+    public CommuteController(UserService userService, NotificationService notificationService) {
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     @PostMapping("/start")
@@ -32,6 +33,16 @@ public class CommuteController {
         System.out.println("Received user data: " + userDTO);
         userService.saveUserWork(userDTO);
         return ResponseEntity.ok("Отправим уведомление за 30 минут до выезда!");
+    }
+    @GetMapping("/{telegramUserId}")
+    public ResponseEntity<NotificationDTO> getNotification(@PathVariable Long telegramUserId) {
+        NotificationDTO notification = notificationService.buildNotificationInfo(telegramUserId);
+
+        if (notification != null) {
+            return ResponseEntity.ok(notification);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
 }

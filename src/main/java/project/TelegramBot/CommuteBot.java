@@ -132,7 +132,7 @@ public class CommuteBot extends TelegramLongPollingBot {
     }
 
 
-    private void sendMessage(Long chatId, String text) {
+    public void sendMessage(Long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId.toString());
         message.setText(text);
@@ -143,6 +143,7 @@ public class CommuteBot extends TelegramLongPollingBot {
             e.printStackTrace();
         }
     }
+
 
     @Override
     public String getBotUsername() {

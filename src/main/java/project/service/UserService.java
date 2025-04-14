@@ -2,6 +2,8 @@ package project.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import project.DTO.Coordinates;
+import project.DTO.Location;
 import project.DTO.UserDTO;
 import project.DTO.UserDetailsDTO;
 import project.model.*;
@@ -9,7 +11,6 @@ import project.model.*;
 import project.repository.AddressAndTimeRepository;
 import project.repository.UserRepository;
 
-import java.time.Duration;
 import java.util.Optional;
 
 @Service

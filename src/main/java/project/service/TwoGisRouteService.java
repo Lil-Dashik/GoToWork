@@ -10,10 +10,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import project.configuration.TwoGisConfig;
-import project.model.Coordinates;
+import project.DTO.Coordinates;
 
 import org.springframework.http.HttpHeaders;
-import java.time.Duration;
 
 @Service
 public class TwoGisRouteService {
@@ -65,9 +64,9 @@ public class TwoGisRouteService {
                     logger.info("Response body: {}", response.getBody());
                     JSONObject route = resultArray.getJSONObject(0);
                     int seconds = route.getInt("total_duration");
-                    long minutes = Math.round(seconds / 60.0);
-                    logger.info("minutes: {}", minutes);
-                    return minutes;
+                    long travelTime = Math.round(seconds / 60.0);
+                    logger.info("minutes: {}", travelTime);
+                    return travelTime;
                 } else {
                     throw new RuntimeException("Маршрут не найден в ответе 2ГИС");
                 }
