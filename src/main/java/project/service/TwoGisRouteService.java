@@ -2,6 +2,7 @@ package project.service;
 
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,7 @@ public class TwoGisRouteService {
         this.restTemplate = restTemplate;
         this.twoGisConfig = twoGisConfig;
     }
-    public Long getRouteDuration(Coordinates from, Coordinates to) {
+    public Long getRouteDuration(Coordinates from, Coordinates to) throws JSONException {
         String url = ROUTING_URL + "?key=" + twoGisConfig.getGisKey();
         JSONObject requestBody = new JSONObject();
         JSONArray points = new JSONArray();

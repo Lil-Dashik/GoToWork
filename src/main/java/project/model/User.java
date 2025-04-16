@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
@@ -31,4 +32,6 @@ public class User {
     private UserCoordinates userCoordinates;
     private String timeZone;
     private Long TravelTime;
+    @Column(name = "last_notification_sent")
+    private LocalDate lastNotificationSent;
 }

@@ -1,5 +1,6 @@
 package project.service;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import project.DTO.Coordinates;
@@ -8,10 +9,8 @@ import project.model.AddressAndTime;
 import project.model.User;
 import project.repository.UserRepository;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -24,6 +23,31 @@ public class NotificationService {
         this.userRepository = userRepository;
         this.twoGisRouteService = twoGisRouteService;
     }
+    public List<NotificationDTO> getNotificationsToSend() {
+        LocalDate today = LocalDate.now();
+
+        DayOfWeek day = today.getDayOfWeek();
+        if (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY) {
+            return Collections.emptyList();
+        }
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .filter(User::isNotificationEnabled)
+                .filter(user -> user.getLastNotificationSent() == null || !user.getLastNotificationSent().isEqual(today))
+                .filter(this::isUserProfileComplete)
+                .map(User::getTelegramUserId)
+                .map(this::buildNotificationInfo)
+                .filter(dto -> dto.getNotifyTime().isBefore(LocalDateTime.now()))
+                .toList();
+    }
+    private boolean isUserProfileComplete(User user) {
+        return user.getAddressAndTime() != null &&
+                user.getAddressAndTime().getWorkStartTime() != null &&
+                user.getTimeZone() != null &&
+                user.getTravelTime() != null;
+    }
+
 
     public NotificationDTO buildNotificationInfo(Long telegramId) {
         User user = userRepository.findByTelegramUserId(telegramId)
@@ -44,7 +68,7 @@ public class NotificationService {
         return new NotificationDTO(telegramId, message, todayNotifyTime);
     }
 
-    public void updateTravelTimeIfNeeded() {
+    public void updateTravelTimeIfNeeded() throws JSONException {
         List<User> users = userRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
 

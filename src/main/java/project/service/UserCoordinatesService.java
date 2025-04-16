@@ -8,6 +8,8 @@ import project.DTO.Coordinates;
 import project.model.UserCoordinates;
 import project.repository.UserCoordinatesRepository;
 
+import java.util.Optional;
+
 @Service
 public class UserCoordinatesService {
     private static final Logger logger = LoggerFactory.getLogger(UserCoordinatesService.class);
@@ -20,18 +22,14 @@ public class UserCoordinatesService {
     }
 
     public UserCoordinates saveCoordinates(Long telegramUserId, Coordinates homeCoordinates, Coordinates workCoordinates) {
-        if (homeCoordinates != null && workCoordinates != null) {
-            UserCoordinates newCoordinates = new UserCoordinates(
-                    telegramUserId,
-                    homeCoordinates.getLatitude(),
-                    homeCoordinates.getLongitude(),
-                    workCoordinates.getLatitude(),
-                    workCoordinates.getLongitude()
-            );
-            return userCoordinatesRepository.save(newCoordinates);
-        } else {
-            logger.error("Некоторые координаты не были получены (дом или работа).");
-        }
-        return null;
+        Optional<UserCoordinates> existing = userCoordinatesRepository.findByTelegramUserId(telegramUserId);
+
+        UserCoordinates newCoordinates = existing.orElse(new UserCoordinates());
+        newCoordinates.setTelegramUserId(telegramUserId);
+        newCoordinates.setHomeLatitude(homeCoordinates.getLatitude());
+        newCoordinates.setHomeLongitude(homeCoordinates.getLongitude());
+        newCoordinates.setWorkLatitude(workCoordinates.getLatitude());
+        newCoordinates.setWorkLongitude(workCoordinates.getLongitude());
+        return userCoordinatesRepository.save(newCoordinates);
     }
 }

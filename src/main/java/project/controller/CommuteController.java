@@ -1,14 +1,16 @@
 package project.controller;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.DTO.NotificationDTO;
 import project.DTO.UserDTO;
 import project.DTO.UserDetailsDTO;
-import project.service.CommuteService;
 import project.service.NotificationService;
 import project.service.UserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/commute")
@@ -29,7 +31,7 @@ public class CommuteController {
     }
 
     @PostMapping("/goToWork")
-    public ResponseEntity<String> goToWork(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<String> goToWork(@RequestBody UserDTO userDTO) throws JSONException {
         System.out.println("Received user data: " + userDTO);
         userService.saveUserWork(userDTO);
         return ResponseEntity.ok("Отправим уведомление за 30 минут до выезда!");
@@ -43,6 +45,21 @@ public class CommuteController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationDTO>> getNotificationsToSend() {
+        List<NotificationDTO> notifications = notificationService.getNotificationsToSend();
+        return ResponseEntity.ok(notifications);
+    }
+    @PostMapping("/markNotified")
+    public ResponseEntity<Void> markUserNotified(@RequestBody Long telegramUserId) {
+        userService.markAsNotifiedToday(telegramUserId);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/stop")
+    public ResponseEntity<String> disableNotifications(@RequestBody Long telegramUserId) {
+        userService.disableNotifications(telegramUserId);
+        return ResponseEntity.ok("Уведомления отключены");
     }
 
 }

@@ -1,7 +1,9 @@
 package project.service;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import project.DTO.Coordinates;
 import project.DTO.Location;
 import project.DTO.UserDTO;
@@ -11,6 +13,7 @@ import project.model.*;
 import project.repository.AddressAndTimeRepository;
 import project.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
@@ -41,10 +44,12 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void saveUserWork(UserDTO userDTO) {
+    public void saveUserWork(UserDTO userDTO) throws JSONException {
         Optional<User> userOpt = userRepository.findByTelegramUserId(userDTO.getTelegramUserId());
+        AddressAndTime addressAndTime = addressAndTimeRepository
+                .findByTelegramUserId(userDTO.getTelegramUserId())
+                .orElseGet(AddressAndTime::new);
 
-        AddressAndTime addressAndTime = new AddressAndTime();
         addressAndTime.setTelegramUserId(userDTO.getTelegramUserId());
         addressAndTime.setHomeAddress(userDTO.getHomeAddress());
         addressAndTime.setWorkAddress(userDTO.getWorkAddress());
@@ -74,9 +79,22 @@ public class UserService {
 
         }
     }
-
-    public User getUserByTelegramUserId(Long telegramUserId) {
-        Optional<User> userOpt = userRepository.findByTelegramUserId(telegramUserId);
-        return userOpt.get();
+    public void markAsNotifiedToday(Long telegramUserId) {
+        userRepository.findByTelegramUserId(telegramUserId).ifPresent(user -> {
+            user.setLastNotificationSent(LocalDate.now());
+            userRepository.save(user);
+        });
     }
+    @Transactional
+    public void disableNotifications(Long telegramUserId) {
+        User user = userRepository.findByTelegramUserId(telegramUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setNotificationEnabled(false);
+        userRepository.save(user);
+    }
+
+//    public User getUserByTelegramUserId(Long telegramUserId) {
+//        Optional<User> userOpt = userRepository.findByTelegramUserId(telegramUserId);
+//        return userOpt.get();
+//    }
 }
