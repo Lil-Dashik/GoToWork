@@ -20,6 +20,7 @@ public class TravelTimeUpdater {
     public void updateTravelTimes() {
         try {
             notificationService.updateTravelTimeIfNeeded();
+            logger.info("Travel time updated");
         } catch (Exception e) {
             logger.error("Ошибка при обновлении времени маршрута", e);
         }
