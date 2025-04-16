@@ -8,7 +8,7 @@ import project.DTO.Coordinates;
 @Getter
 @Setter
 @Entity
-@Table(name="users_coordinates")
+@Table(name = "users_coordinates")
 public class UserCoordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +28,12 @@ public class UserCoordinates {
 
     @Column(name = "work_longitude", nullable = false)
     private double workLongitude;
+
     @OneToOne(mappedBy = "userCoordinates")
     private User user;
 
-    public UserCoordinates() {}
+    public UserCoordinates() {
+    }
 
     public UserCoordinates(Long telegramUserId, double homeLatitude, double homeLongitude, double workLatitude, double workLongitude) {
         this.telegramUserId = telegramUserId;
@@ -40,6 +42,7 @@ public class UserCoordinates {
         this.workLatitude = workLatitude;
         this.workLongitude = workLongitude;
     }
+
     public Coordinates getHomeCoordinates() {
         return new Coordinates(homeLatitude, homeLongitude);
     }

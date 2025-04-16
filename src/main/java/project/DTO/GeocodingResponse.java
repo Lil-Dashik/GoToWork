@@ -13,7 +13,10 @@ public class GeocodingResponse {
     private double geo_lon;
     @JsonProperty("timezone")
     private String timeZone;
-    public GeocodingResponse(){}
+
+    public GeocodingResponse() {
+    }
+
     public GeocodingResponse(double lat, double lon, String timeZone) {
         this.geo_lat = lat;
         this.geo_lon = lon;

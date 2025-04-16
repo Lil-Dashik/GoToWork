@@ -23,22 +23,24 @@ public class GeocodingService {
     private static final String GEOCODE_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
     private final DadataConfig dadataConfig;
     private final RestTemplate restTemplate;
+    private final HttpHeaders headers;
 
 
     @Autowired
-    public GeocodingService(DadataConfig dadataConfig, RestTemplate restTemplate) {
+    public GeocodingService(DadataConfig dadataConfig, RestTemplate restTemplate, HttpHeaders headers) {
 
         this.dadataConfig = dadataConfig;
         this.restTemplate = restTemplate;
+        this.headers = headers;
     }
+
     public Location getCoordinates(String address) {
-        HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Token " + dadataConfig.getDadataKey());
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
         headers.add("X-Secret", dadataConfig.getDadataSecret());
 
-        String requestBody =  "[\"" + address + "\"]";
+        String requestBody = "[\"" + address + "\"]";
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
         logger.info("Request body: {}", requestBody);
@@ -47,7 +49,8 @@ public class GeocodingService {
                 GEOCODE_URL,
                 HttpMethod.POST,
                 entity,
-                new ParameterizedTypeReference<>() {}
+                new ParameterizedTypeReference<>() {
+                }
         );
         logger.info("Response status: {}", response.getStatusCode());
         logger.info("Response body: {}", response.getBody());

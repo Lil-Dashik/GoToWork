@@ -7,6 +7,6 @@ import project.model.AddressAndTime;
 import java.util.Optional;
 
 @Repository
-public interface AddressAndTimeRepository extends JpaRepository<AddressAndTime,Long> {
+public interface AddressAndTimeRepository extends JpaRepository<AddressAndTime, Long> {
     Optional<AddressAndTime> findByTelegramUserId(Long telegramUserId);
 }

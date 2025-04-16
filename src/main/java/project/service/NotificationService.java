@@ -23,6 +23,7 @@ public class NotificationService {
         this.userRepository = userRepository;
         this.twoGisRouteService = twoGisRouteService;
     }
+
     public List<NotificationDTO> getNotificationsToSend() {
         LocalDate today = LocalDate.now();
 
@@ -41,6 +42,7 @@ public class NotificationService {
                 .filter(dto -> dto.getNotifyTime().isBefore(LocalDateTime.now()))
                 .toList();
     }
+
     private boolean isUserProfileComplete(User user) {
         return user.getAddressAndTime() != null &&
                 user.getAddressAndTime().getWorkStartTime() != null &&

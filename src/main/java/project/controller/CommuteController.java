@@ -37,7 +37,7 @@ public class CommuteController {
     }
 
     @PostMapping("/goToWork")
-    public ResponseEntity<String> goToWork(@RequestParam Long telegramId, @RequestBody String message)  {
+    public ResponseEntity<String> goToWork(@RequestParam Long telegramId, @RequestBody String message) {
         try {
             parseService.parseAndSave(telegramId, message);
             return ResponseEntity.ok("Данные сохранены");
@@ -48,6 +48,7 @@ public class CommuteController {
             return ResponseEntity.internalServerError().body("Внутренняя ошибка");
         }
     }
+
     @GetMapping("/{telegramUserId}")
     public ResponseEntity<NotificationDTO> getNotification(@PathVariable Long telegramUserId) {
         NotificationDTO notification = notificationService.buildNotificationInfo(telegramUserId);
@@ -58,16 +59,19 @@ public class CommuteController {
             return ResponseEntity.notFound().build();
         }
     }
+
     @GetMapping("/notifications")
     public ResponseEntity<List<NotificationDTO>> getNotificationsToSend() {
         List<NotificationDTO> notifications = notificationService.getNotificationsToSend();
         return ResponseEntity.ok(notifications);
     }
+
     @PostMapping("/markNotified")
     public ResponseEntity<Void> markUserNotified(@RequestBody Long telegramUserId) {
         userService.markAsNotifiedToday(telegramUserId);
         return ResponseEntity.ok().build();
     }
+
     @PostMapping("/stop")
     public ResponseEntity<String> disableNotifications(@RequestBody Long telegramUserId) {
         userService.disableNotifications(telegramUserId);

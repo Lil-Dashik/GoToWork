@@ -18,6 +18,8 @@ public class Location {
         this.coordinatesLon = coordinatesLon;
         this.timeZone = timeZone;
     }
-    public Location(){}
+
+    public Location() {
+    }
 
 }

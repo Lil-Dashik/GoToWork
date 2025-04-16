@@ -5,10 +5,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalTime;
+
 @Getter
 @Setter
 @Entity
-@Table(name="address_and_time")
+@Table(name = "address_and_time")
 public class AddressAndTime {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +21,10 @@ public class AddressAndTime {
     private LocalTime workStartTime;
     @OneToOne(mappedBy = "addressAndTime")
     private User user;
-    public AddressAndTime() {}
+
+    public AddressAndTime() {
+    }
+
     public AddressAndTime(Long telegramUserId, String homeAddress, String workAddress, LocalTime workStartTime) {
         this.homeAddress = homeAddress;
         this.workAddress = workAddress;

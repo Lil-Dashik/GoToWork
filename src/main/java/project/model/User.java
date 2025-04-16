@@ -16,20 +16,27 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "telegram_user_id", unique = true)
     private Long telegramUserId;
+
     @Column(name = "notification_enabled", nullable = false)
     private boolean notificationEnabled = true;
+
     private String username;
     private String firstName;
+
     @OneToOne
     @JoinColumn(name = "address_and_time_id")
     private AddressAndTime addressAndTime;
+
     @OneToOne
-    @JoinColumn(name="coordinates_id")
+    @JoinColumn(name = "coordinates_id")
     private UserCoordinates userCoordinates;
+
     private String timeZone;
     private Long TravelTime;
+
     @Column(name = "last_notification_sent")
     private LocalDate lastNotificationSent;
 }

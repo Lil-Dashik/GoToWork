@@ -16,11 +16,13 @@ import java.util.Optional;
 public class ParseService {
     private final UserService userService;
     private final UserRepository userRepository;
+
     @Autowired
     public ParseService(UserService userService, UserRepository userRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
     }
+
     public void parseAndSaveUser(String input) {
         String[] parts = input.split(";");
         if (parts.length != 3) {
@@ -41,13 +43,14 @@ public class ParseService {
             return;
         }
 
-            User newUser = new User();
-            newUser.setTelegramUserId(telegramId);
-            newUser.setUsername(username);
-            newUser.setFirstName(firstName);
-            newUser.setNotificationEnabled(true);
-            userRepository.save(newUser);
+        User newUser = new User();
+        newUser.setTelegramUserId(telegramId);
+        newUser.setUsername(username);
+        newUser.setFirstName(firstName);
+        newUser.setNotificationEnabled(true);
+        userRepository.save(newUser);
     }
+
     public void parseAndSave(Long telegramId, String userInput) throws JSONException {
         String[] parts = userInput.split(";");
 

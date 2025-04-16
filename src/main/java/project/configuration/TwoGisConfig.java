@@ -11,7 +11,10 @@ import org.springframework.context.annotation.Configuration;
 public class TwoGisConfig {
     @Value("${TwoGis.api.key}")
     private String gisKey;
-    public TwoGisConfig() {}
+
+    public TwoGisConfig() {
+    }
+
     public TwoGisConfig(String gisKey) {
         this.gisKey = gisKey;
     }

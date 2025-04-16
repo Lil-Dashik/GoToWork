@@ -13,7 +13,10 @@ public class DadataConfig {
     private String dadataKey;
     @Value("${dadata.api.secret}")
     private String dadataSecret;
-    public DadataConfig() {}
+
+    public DadataConfig() {
+    }
+
     public DadataConfig(String dadataKey, String dadataSecret) {
         this.dadataKey = dadataKey;
         this.dadataSecret = dadataSecret;

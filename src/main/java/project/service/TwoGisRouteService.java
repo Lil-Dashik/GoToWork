@@ -20,13 +20,17 @@ public class TwoGisRouteService {
     private static final Logger logger = LoggerFactory.getLogger(TwoGisRouteService.class);
     private final RestTemplate restTemplate;
     private final TwoGisConfig twoGisConfig;
+    private final HttpHeaders headers;
 
     private static final String ROUTING_URL = "https://routing.api.2gis.com/routing/7.0.0/global";
+
     @Autowired
-    public TwoGisRouteService(RestTemplate restTemplate, TwoGisConfig twoGisConfig) {
+    public TwoGisRouteService(RestTemplate restTemplate, HttpHeaders headers, TwoGisConfig twoGisConfig) {
         this.restTemplate = restTemplate;
         this.twoGisConfig = twoGisConfig;
+        this.headers = headers;
     }
+
     public Long getRouteDuration(Coordinates from, Coordinates to) throws JSONException {
         String url = ROUTING_URL + "?key=" + twoGisConfig.getGisKey();
         JSONObject requestBody = new JSONObject();
@@ -42,7 +46,6 @@ public class TwoGisRouteService {
         requestBody.put("points", points);
         requestBody.put("traffic_mode", "jam");
 
-        HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);

@@ -57,7 +57,7 @@ public class UserService {
             System.out.println("User:" + user.getTelegramUserId());
             user.setAddressAndTime(addressAndTime);
 
-            if (user.getTimeZone() == null){
+            if (user.getTimeZone() == null) {
                 user.setTimeZone(homeLocation.getTimeZone());
             }
             UserCoordinates newCoordinates = userCoordinatesService
@@ -70,12 +70,14 @@ public class UserService {
 
         }
     }
+
     public void markAsNotifiedToday(Long telegramUserId) {
         userRepository.findByTelegramUserId(telegramUserId).ifPresent(user -> {
             user.setLastNotificationSent(LocalDate.now());
             userRepository.save(user);
         });
     }
+
     @Transactional
     public void disableNotifications(Long telegramUserId) {
         User user = userRepository.findByTelegramUserId(telegramUserId)
