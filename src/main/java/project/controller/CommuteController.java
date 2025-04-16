@@ -1,13 +1,11 @@
 package project.controller;
 
-import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.DTO.NotificationDTO;
-import project.DTO.UserDTO;
-import project.DTO.UserDetailsDTO;
 import project.service.NotificationService;
+import project.service.ParseService;
 import project.service.UserService;
 
 import java.util.List;
@@ -17,24 +15,38 @@ import java.util.List;
 public class CommuteController {
     private final UserService userService;
     private final NotificationService notificationService;
+    private final ParseService parseService;
 
     @Autowired
-    public CommuteController(UserService userService, NotificationService notificationService) {
+    public CommuteController(UserService userService, NotificationService notificationService,
+                             ParseService parseService) {
         this.userService = userService;
         this.notificationService = notificationService;
+        this.parseService = parseService;
     }
 
     @PostMapping("/start")
-    public String startCommand(@RequestBody UserDetailsDTO userDetailsDTO) {
-        userService.saveUserData(userDetailsDTO);
-        return "Данные сохранены";
+    public ResponseEntity<String> start(@RequestBody String input) {
+        try {
+            parseService.parseAndSaveUser(input);
+            return ResponseEntity.ok("OK");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Ошибка при сохранении пользователя");
+        }
     }
 
     @PostMapping("/goToWork")
-    public ResponseEntity<String> goToWork(@RequestBody UserDTO userDTO) throws JSONException {
-        System.out.println("Received user data: " + userDTO);
-        userService.saveUserWork(userDTO);
-        return ResponseEntity.ok("Отправим уведомление за 30 минут до выезда!");
+    public ResponseEntity<String> goToWork(@RequestParam Long telegramId, @RequestBody String message)  {
+        try {
+            parseService.parseAndSave(telegramId, message);
+            return ResponseEntity.ok("Данные сохранены");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Внутренняя ошибка");
+        }
     }
     @GetMapping("/{telegramUserId}")
     public ResponseEntity<NotificationDTO> getNotification(@PathVariable Long telegramUserId) {

@@ -19,6 +19,12 @@ spring:
         id:
           new_generator_mappings: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  main:
+    allow-bean-definition-overriding: true
+  task:
+    scheduling:
+      pool:
+        size: 5
 dadata:
   api:
     key: "079ab8ffc4cc858af3494978f47b670e5f5aa516"

@@ -3,9 +3,7 @@ package project.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Getter
 @Setter

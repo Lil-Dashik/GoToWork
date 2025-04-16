@@ -52,20 +52,27 @@ public class NotificationService {
     public NotificationDTO buildNotificationInfo(Long telegramId) {
         User user = userRepository.findByTelegramUserId(telegramId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
-
+        ZoneId userZone = ZoneId.of(user.getTimeZone());
+        if (user.getTimeZone() == null) {
+            throw new IllegalStateException("Не указан часовой пояс для пользователя " + telegramId);
+        }
         LocalTime workStart = user.getAddressAndTime().getWorkStartTime();
         Long minTravelTime = user.getTravelTime();
         Duration travelTime = Duration.ofMinutes(minTravelTime);
-        LocalTime leaveHomeTime = workStart.minus(travelTime);
 
-        LocalTime notifyTime = leaveHomeTime.minusMinutes(30);
+        LocalDate today = LocalDate.now(userZone);
+        ZonedDateTime workStartZdt = ZonedDateTime.of(today, workStart, userZone);
 
-        LocalDateTime now = LocalDateTime.now(ZoneId.of(user.getTimeZone()));
-        LocalDateTime todayNotifyTime = LocalDateTime.of(now.toLocalDate(), notifyTime);
+        ZonedDateTime leaveHomeZdt = workStartZdt.minus(travelTime);
+        ZonedDateTime notifyZdt = leaveHomeZdt.minusMinutes(30);
 
         String message = String.format("Через 30 минут нужно выходить, чтобы успеть к %s", workStart);
 
-        return new NotificationDTO(telegramId, message, todayNotifyTime);
+        return new NotificationDTO(
+                telegramId,
+                message,
+                notifyZdt.toLocalDateTime()
+        );
     }
 
     public void updateTravelTimeIfNeeded() throws JSONException {

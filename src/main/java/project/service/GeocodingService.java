@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import project.configuration.DadataConfig;
-import project.Dadata.GeocodingResponse;
+import project.DTO.GeocodingResponse;
 
 import org.springframework.http.HttpHeaders;
 import project.DTO.Location;
@@ -20,13 +20,16 @@ import java.util.List;
 @Service
 public class GeocodingService {
     private static final Logger logger = LoggerFactory.getLogger(GeocodingService.class);
-    private final DadataConfig dadataConfig;
     private static final String GEOCODE_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
+    private final DadataConfig dadataConfig;
+    private final RestTemplate restTemplate;
 
 
     @Autowired
-    public GeocodingService(DadataConfig dadataConfig) {
+    public GeocodingService(DadataConfig dadataConfig, RestTemplate restTemplate) {
+
         this.dadataConfig = dadataConfig;
+        this.restTemplate = restTemplate;
     }
     public Location getCoordinates(String address) {
         HttpHeaders headers = new HttpHeaders();
@@ -38,14 +41,13 @@ public class GeocodingService {
         String requestBody =  "[\"" + address + "\"]";
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        RestTemplate restTemplate = new RestTemplate();
         logger.info("Request body: {}", requestBody);
         logger.info("Request headers: {}", headers);
         ResponseEntity<List<GeocodingResponse>> response = restTemplate.exchange(
                 GEOCODE_URL,
                 HttpMethod.POST,
                 entity,
-                new ParameterizedTypeReference<List<GeocodingResponse>>() {}
+                new ParameterizedTypeReference<>() {}
         );
         logger.info("Response status: {}", response.getStatusCode());
         logger.info("Response body: {}", response.getBody());

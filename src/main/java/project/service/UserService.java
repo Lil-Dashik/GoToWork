@@ -7,7 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import project.DTO.Coordinates;
 import project.DTO.Location;
 import project.DTO.UserDTO;
-import project.DTO.UserDetailsDTO;
 import project.model.*;
 
 import project.repository.AddressAndTimeRepository;
@@ -33,15 +32,6 @@ public class UserService {
         this.userCoordinatesService = userCoordinatesService;
         this.geocodingService = geocodingService;
         this.twoGisRouteService = twoGisRouteService;
-    }
-
-    public void saveUserData(UserDetailsDTO userDetailsDTO) {
-        User user = new User();
-
-        user.setTelegramUserId(userDetailsDTO.getTelegramUserId());
-        user.setUsername(userDetailsDTO.getUsername());
-        user.setFirstName(userDetailsDTO.getFirstName());
-        userRepository.save(user);
     }
 
     public void saveUserWork(UserDTO userDTO) throws JSONException {
@@ -75,6 +65,7 @@ public class UserService {
             user.setUserCoordinates(newCoordinates);
 
             user.setTravelTime(travelTime);
+            user.setLastNotificationSent(null);
             userRepository.save(user);
 
         }
@@ -92,9 +83,4 @@ public class UserService {
         user.setNotificationEnabled(false);
         userRepository.save(user);
     }
-
-//    public User getUserByTelegramUserId(Long telegramUserId) {
-//        Optional<User> userOpt = userRepository.findByTelegramUserId(telegramUserId);
-//        return userOpt.get();
-//    }
 }

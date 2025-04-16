@@ -1,4 +1,4 @@
-package project.Dadata;
+package project.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

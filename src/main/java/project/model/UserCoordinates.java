@@ -40,12 +40,6 @@ public class UserCoordinates {
         this.workLatitude = workLatitude;
         this.workLongitude = workLongitude;
     }
-//    public UserCoordinates(double homeLatitude, double homeLongitude, double workLatitude, double workLongitude) {
-//        this.homeLatitude = homeLatitude;
-//        this.homeLongitude = homeLongitude;
-//        this.workLatitude = workLatitude;
-//        this.workLongitude = workLongitude;
-//    }
     public Coordinates getHomeCoordinates() {
         return new Coordinates(homeLatitude, homeLongitude);
     }
