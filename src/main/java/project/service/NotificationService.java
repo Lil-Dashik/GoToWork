@@ -5,9 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.DTO.Coordinates;
-import project.DTO.NotificationDTO;
-import project.model.AddressAndTime;
+import project.dto.Coordinates;
+import project.dto.NotificationDTO;
 import project.model.User;
 import project.repository.UserRepository;
 
@@ -29,107 +28,165 @@ public class NotificationService {
     }
 
     public List<NotificationDTO> getNotificationsToSend() {
-        LocalDate today = LocalDate.now();
-
-        DayOfWeek day = today.getDayOfWeek();
-        if (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY) {
+        if (isWeekend(LocalDate.now())) {
             return Collections.emptyList();
         }
-        List<User> users = userRepository.findAll();
 
-        return users.stream()
-                .filter(User::isNotificationEnabled)
-                .filter(user -> user.getLastNotificationSent() == null || !user.getLastNotificationSent().isEqual(today))
-                .filter(this::isUserProfileComplete)
-                .map(user -> {
-                    NotificationDTO dto = buildNotificationInfo(user.getTelegramUserId());
-                    ZonedDateTime nowInUserZone = ZonedDateTime.now(ZoneId.of(user.getTimeZone()));
-                    return Map.entry(dto, nowInUserZone);
-                })
-                .filter(entry -> {
-                    ZonedDateTime notifyTime = entry.getKey().getNotifyTime();
-                    ZonedDateTime now = entry.getValue();
-                    long diff = Duration.between(notifyTime, now).toMinutes();
-                    logger.debug("Проверка уведомления для userId={} | notifyTime={} | now={} | разница={} мин",
-                            entry.getKey().getTelegramUserId(), notifyTime, now, diff);
-                    return diff >= 0 && diff <= 1;
-                })
+        List<NotificationDTO> result = userRepository.findAll().stream()
+                .filter(this::shouldNotifyUser)
+                .map(user -> Map.entry(buildNotificationInfo(user.getTelegramUserId()), currentTimeInUserZone(user)))
+                .filter(this::isNotificationTime)
                 .map(Map.Entry::getKey)
                 .toList();
 
+        logger.info("Готовим отправку уведомлений для пользователей: {}",
+                result.stream().map(NotificationDTO::getTelegramUserId).toList());
+
+        return result;
+    }
+
+    private boolean shouldNotifyUser(User user) {
+        return user.isNotificationEnabled()
+                && (user.getLastNotificationSent() == null || !user.getLastNotificationSent().isEqual(LocalDate.now()))
+                && isUserProfileComplete(user);
     }
 
     private boolean isUserProfileComplete(User user) {
         return user.getAddressAndTime() != null &&
                 user.getAddressAndTime().getWorkStartTime() != null &&
                 user.getTimeZone() != null &&
-                user.getTravelTime() != null;
+                user.getCurrentTravelTime() != null;
     }
 
+    private boolean isWeekend(LocalDate date) {
+        DayOfWeek day = date.getDayOfWeek();
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
+    }
+
+    private ZonedDateTime currentTimeInUserZone(User user) {
+        return ZonedDateTime.now(ZoneId.of(user.getTimeZone()));
+    }
+
+    private boolean isNotificationTime(Map.Entry<NotificationDTO, ZonedDateTime> entry) {
+        ZonedDateTime notifyTime = entry.getKey().getNotifyTime();
+        ZonedDateTime now = entry.getValue();
+        long diff = Duration.between(notifyTime, now).toMinutes();
+
+        logger.info("Проверка уведомления для userId={} | notifyTime={} | now={} | разница={} мин",
+                entry.getKey().getTelegramUserId(), notifyTime, now, diff);
+
+        if (notifyTime.isBefore(now.minusMinutes(15))) {
+            logger.warn("Слишком раннее уведомление для userId={}, notifyTime={}, now={}",
+                    entry.getKey().getTelegramUserId(), notifyTime, now);
+            return false;
+        }
+
+        return diff >= -2 && diff <= 30;
+    }
 
     public NotificationDTO buildNotificationInfo(Long telegramId) {
         User user = userRepository.findByTelegramUserId(telegramId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (user.getTimeZone() == null) {
-            throw new IllegalStateException("Не указан часовой пояс для пользователя " + telegramId);
-        }
+                .orElseThrow(() -> new RuntimeException("User not found with telegramId = " + telegramId));
 
         ZoneId userZone = ZoneId.of(user.getTimeZone());
         LocalTime workStart = user.getAddressAndTime().getWorkStartTime();
-        Long minTravelTime = user.getTravelTime();
+        Long travelTime = user.getCurrentTravelTime();
 
-        Duration totalOffset = Duration.ofMinutes(minTravelTime + 30);
+        Duration totalOffset = Duration.ofMinutes(travelTime + 30);
         LocalDate today = LocalDate.now(userZone);
-        ZonedDateTime workStartZdt = ZonedDateTime.of(today, workStart, userZone);
-        ZonedDateTime notifyZdt = workStartZdt.minus(totalOffset);
+        ZonedDateTime notifyZdt = ZonedDateTime.of(today, workStart, userZone).minus(totalOffset);
 
         String message = String.format("Через 30 минут нужно выходить, чтобы успеть к %s", workStart);
 
-        return new NotificationDTO(
-                telegramId,
-                message,
-                notifyZdt
-        );
+        return new NotificationDTO(user.getTelegramUserId(), message, notifyZdt);
     }
 
-    public void updateTravelTimeIfNeeded() throws JSONException {
-        List<User> users = userRepository.findAll();
+    public void updateTravelTimeIfNeeded() {
+        userRepository.findAll().stream()
+                .filter(this::shouldUpdateTravelTime)
+                .forEach(this::updateUserTravelTime);
+    }
 
-        for (User user : users) {
-            if (!user.isNotificationEnabled()) continue;
+    private boolean shouldUpdateTravelTime(User user) {
+        return user.isNotificationEnabled()
+                && user.getAddressAndTime() != null
+                && user.getUserCoordinates() != null;
+    }
 
-            AddressAndTime data = user.getAddressAndTime();
-            if (data == null || user.getUserCoordinates() == null) continue;
+    private void updateUserTravelTime(User user) {
+        ZoneId zoneId = ZoneId.of(user.getTimeZone());
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        LocalTime workStart = user.getAddressAndTime().getWorkStartTime();
 
-            ZoneId zoneId = ZoneId.of(user.getTimeZone());
-            ZonedDateTime now = ZonedDateTime.now(zoneId);
+        Long baseTravelTime = user.getMinObservedTravelTime();
+        if (baseTravelTime == null) baseTravelTime = user.getCurrentTravelTime();
+        if (baseTravelTime == null) {
+            initializeTravelTime(user);
+            return;
+        }
 
-            LocalTime workStart = data.getWorkStartTime();
-            Duration savedTravel = Duration.ofMinutes(user.getTravelTime());
+        ZonedDateTime expectedCheckTime = ZonedDateTime.of(
+                now.toLocalDate(),
+                workStart.minusMinutes(baseTravelTime).minusMinutes(60),
+                zoneId
+        );
 
-            ZonedDateTime expectedCheckTime = ZonedDateTime.of(
-                    now.toLocalDate(),
-                    workStart.minus(savedTravel).minusMinutes(30),
-                    zoneId
-            );
+        long diffMinutes = Duration.between(expectedCheckTime, now).toMinutes();
+        logger.info("Пользователь {}: плановая проверка в {} (разница {} мин)",
+                user.getTelegramUserId(), expectedCheckTime, diffMinutes);
 
-            logger.debug("Пользователь {}: плановая проверка в {} (разница {} мин)",
-                    user.getTelegramUserId(),
-                    expectedCheckTime,
-                    Duration.between(now, expectedCheckTime).toMinutes());
+        if (diffMinutes >= -30 && diffMinutes <= 2) {
+            Coordinates from = user.getUserCoordinates().getHomeCoordinates();
+            Coordinates to = user.getUserCoordinates().getWorkCoordinates();
+            try {
+                long updatedMinutes = twoGisRouteService.getRouteDurationWithTraffic(from, to);
 
-            if (Duration.between(now, expectedCheckTime).abs().toMinutes() <= 1) {
-                Coordinates from = user.getUserCoordinates().getHomeCoordinates();
-                Coordinates to = user.getUserCoordinates().getWorkCoordinates();
+                logger.info("Обновляем currentTravelTime для пользователя {}: было {} мин, стало {} мин",
+                        user.getTelegramUserId(), user.getCurrentTravelTime(), updatedMinutes);
 
-                long updatedMinutes = twoGisRouteService.getRouteDuration(from, to);
-                logger.info("Обновляем travelTime для пользователя {}: старое значение {} мин, новое значение {} мин",
-                        user.getTelegramUserId(), user.getTravelTime(), updatedMinutes);
+                if (updatedMinutes > baseTravelTime) {
+                    ZonedDateTime newNotifyTime = ZonedDateTime.of(
+                            now.toLocalDate(),
+                            workStart.minusMinutes(updatedMinutes).minusMinutes(30),
+                            zoneId
+                    );
 
-                user.setTravelTime(updatedMinutes);
+
+                    logger.info("Время в пути увеличилось, новое время оповещения для пользователя {}: {}",
+                            user.getTelegramUserId(), newNotifyTime);
+                }
+                user.setCurrentTravelTime(updatedMinutes);
+
+                Long minObserved = user.getMinObservedTravelTime();
+                if (minObserved == null || updatedMinutes < minObserved) {
+                    user.setMinObservedTravelTime(updatedMinutes);
+                    logger.info("Обновлено минимальное travelTime: {} мин", updatedMinutes);
+                }
+
                 userRepository.save(user);
+            } catch (JSONException e) {
+                logger.error("Ошибка при получении маршрута от 2ГИС: {}", e.getMessage());
             }
         }
     }
+    private void initializeTravelTime(User user) {
+        logger.info("У пользователя {} нет времени поездки. Запрашиваем маршрут впервые...", user.getTelegramUserId());
+        try {
+            Coordinates from = user.getUserCoordinates().getHomeCoordinates();
+            Coordinates to = user.getUserCoordinates().getWorkCoordinates();
+            long initialTravelTime = twoGisRouteService.getRouteDurationWithTraffic(from, to);
+
+            user.setCurrentTravelTime(initialTravelTime);
+            user.setMinObservedTravelTime(initialTravelTime);
+
+            logger.info(" Рассчитано первое время в пути для пользователя {}: {} мин", user.getTelegramUserId(), initialTravelTime);
+
+            userRepository.save(user);
+        } catch (JSONException e) {
+            logger.error(" Ошибка при получении маршрута от 2ГИС для нового пользователя: {}", e.getMessage());
+        }
+    }
 }
+
+
+

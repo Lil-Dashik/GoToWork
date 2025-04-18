@@ -3,7 +3,7 @@ package project.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import project.DTO.NotificationDTO;
+import project.dto.NotificationDTO;
 import project.service.NotificationService;
 import project.service.ParseService;
 import project.service.UserService;
@@ -25,7 +25,7 @@ public class CommuteController {
         this.parseService = parseService;
     }
 
-    @PostMapping("/start")
+    @PostMapping("bot/commands/start")
     public ResponseEntity<String> start(@RequestBody String input) {
         try {
             parseService.parseAndSaveUser(input);
@@ -36,7 +36,7 @@ public class CommuteController {
         }
     }
 
-    @PostMapping("/goToWork")
+    @PostMapping("bot/commands/goToWork")
     public ResponseEntity<String> goToWork(@RequestParam Long telegramId, @RequestBody String message) {
         try {
             parseService.parseAndSave(telegramId, message);
@@ -72,7 +72,7 @@ public class CommuteController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/stop")
+    @PostMapping("bot/commands/stop")
     public ResponseEntity<String> disableNotifications(@RequestBody Long telegramUserId) {
         userService.disableNotifications(telegramUserId);
         return ResponseEntity.ok("Уведомления отключены");

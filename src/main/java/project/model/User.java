@@ -35,7 +35,8 @@ public class User {
     private UserCoordinates userCoordinates;
 
     private String timeZone;
-    private Long TravelTime;
+    private Long currentTravelTime;
+    private Long minObservedTravelTime;
 
     @Column(name = "last_notification_sent")
     private LocalDate lastNotificationSent;

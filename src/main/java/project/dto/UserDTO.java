@@ -1,6 +1,7 @@
-package project.DTO;
+package project.dto;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 
 @Getter
 @Setter
+@AllArgsConstructor
 @ToString
 public class UserDTO {
     private Long telegramUserId;
@@ -17,13 +19,6 @@ public class UserDTO {
     private LocalTime workStartTime;
 
     public UserDTO() {
-    }
-
-    public UserDTO(String homeAddress, String workAddress, LocalTime workStartTime, Long telegramUserId) {
-        this.homeAddress = homeAddress;
-        this.workAddress = workAddress;
-        this.workStartTime = workStartTime;
-        this.telegramUserId = telegramUserId;
     }
 
 }

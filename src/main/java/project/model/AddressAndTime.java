@@ -1,6 +1,7 @@
 package project.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,6 +10,7 @@ import java.time.LocalTime;
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 @Table(name = "address_and_time")
 public class AddressAndTime {
     @Id
@@ -24,12 +26,4 @@ public class AddressAndTime {
 
     public AddressAndTime() {
     }
-
-    public AddressAndTime(Long telegramUserId, String homeAddress, String workAddress, LocalTime workStartTime) {
-        this.homeAddress = homeAddress;
-        this.workAddress = workAddress;
-        this.workStartTime = workStartTime;
-        this.telegramUserId = telegramUserId;
-    }
-
 }

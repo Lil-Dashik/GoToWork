@@ -3,7 +3,8 @@ package project.service;
 import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import project.DTO.UserDTO;
+import project.dto.UserDTO;
+import project.mapper.UserMapper;
 import project.model.User;
 import project.repository.UserRepository;
 
@@ -16,11 +17,13 @@ import java.util.Optional;
 public class ParseService {
     private final UserService userService;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Autowired
-    public ParseService(UserService userService, UserRepository userRepository) {
+    public ParseService(UserService userService, UserRepository userRepository, UserMapper userMapper) {
         this.userService = userService;
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     public void parseAndSaveUser(String input) {
@@ -43,12 +46,9 @@ public class ParseService {
             return;
         }
 
-        User newUser = new User();
-        newUser.setTelegramUserId(telegramId);
-        newUser.setUsername(username);
-        newUser.setFirstName(firstName);
-        newUser.setNotificationEnabled(true);
+        User newUser = userMapper.toNewUser(telegramId, username, firstName);
         userRepository.save(newUser);
+
     }
 
     public void parseAndSave(Long telegramId, String userInput) throws JSONException {
@@ -69,12 +69,7 @@ public class ParseService {
             throw new IllegalArgumentException("Неверный формат времени. Ожидается HH:mm. Снова выполните команду /go_to_work");
         }
 
-        UserDTO dto = new UserDTO();
-        dto.setTelegramUserId(telegramId);
-        dto.setHomeAddress(home);
-        dto.setWorkAddress(work);
-        dto.setWorkStartTime(time);
-
+        UserDTO dto = userMapper.toUserDTO(telegramId, home, work, time);
         userService.saveUserWork(dto);
     }
 }

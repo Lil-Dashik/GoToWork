@@ -3,61 +3,36 @@ package project.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-import project.configuration.DadataConfig;
-import project.DTO.GeocodingResponse;
+import project.client.DadataClient;
+import project.client.GeocodingResponse;
 
-import org.springframework.http.HttpHeaders;
-import project.DTO.Location;
+import project.dto.Location;
 
 import java.util.List;
 
 @Service
 public class GeocodingService {
     private static final Logger logger = LoggerFactory.getLogger(GeocodingService.class);
-    private static final String GEOCODE_URL = "https://cleaner.dadata.ru/api/v1/clean/address";
-    private final DadataConfig dadataConfig;
-    private final RestTemplate restTemplate;
+    private final DadataClient dadataClient;
 
 
     @Autowired
-    public GeocodingService(DadataConfig dadataConfig, RestTemplate restTemplate) {
-
-        this.dadataConfig = dadataConfig;
-        this.restTemplate = restTemplate;
+    public GeocodingService(DadataClient dadataClient) {
+        this.dadataClient = dadataClient;
     }
 
     public Location getCoordinates(String address) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", "Token " + dadataConfig.getDadataKey());
-        headers.add("Content-Type", "application/json");
-        headers.add("Accept", "application/json");
-        headers.add("X-Secret", dadataConfig.getDadataSecret());
+        logger.info("Отправка запроса в DaData для адреса: {}", address);
+        List<GeocodingResponse> responses = dadataClient.cleanAddress(List.of(address));
 
-        String requestBody = "[\"" + address + "\"]";
-
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-        logger.info("Request body: {}", requestBody);
-        logger.info("Request headers: {}", headers);
-        ResponseEntity<List<GeocodingResponse>> response = restTemplate.exchange(
-                GEOCODE_URL,
-                HttpMethod.POST,
-                entity,
-                new ParameterizedTypeReference<>() {
-                }
-        );
-        logger.info("Response status: {}", response.getStatusCode());
-        logger.info("Response body: {}", response.getBody());
-        if (response.getBody() != null && !response.getBody().isEmpty()) {
-            GeocodingResponse geocodingResponse = response.getBody().get(0);
-            return new Location(geocodingResponse.getGeo_lat(), geocodingResponse.getGeo_lon(), geocodingResponse.getTimeZone());
-
+        if (responses != null && !responses.isEmpty()) {
+            GeocodingResponse response = responses.get(0);
+            logger.info("Получен ответ DaData: {}", response);
+            return new Location(response.getGeo_lat(), response.getGeo_lon(), response.getTimeZone());
         }
+
+        logger.warn("Пустой ответ DaData для адреса: {}", address);
         return null;
     }
 }

@@ -1,13 +1,15 @@
-package project.DTO;
+package project.dto;
 
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 @ToString
 @Getter
 @Setter
+@NoArgsConstructor
 public class Location {
     private double coordinatesLat;
     private double coordinatesLon;
@@ -17,9 +19,6 @@ public class Location {
         this.coordinatesLat = coordinatesLat;
         this.coordinatesLon = coordinatesLon;
         this.timeZone = timeZone;
-    }
-
-    public Location() {
     }
 
 }

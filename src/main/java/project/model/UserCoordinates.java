@@ -1,13 +1,15 @@
 package project.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import project.DTO.Coordinates;
+import project.dto.Coordinates;
 
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
 @Table(name = "users_coordinates")
 public class UserCoordinates {
     @Id
@@ -33,14 +35,6 @@ public class UserCoordinates {
     private User user;
 
     public UserCoordinates() {
-    }
-
-    public UserCoordinates(Long telegramUserId, double homeLatitude, double homeLongitude, double workLatitude, double workLongitude) {
-        this.telegramUserId = telegramUserId;
-        this.homeLatitude = homeLatitude;
-        this.homeLongitude = homeLongitude;
-        this.workLatitude = workLatitude;
-        this.workLongitude = workLongitude;
     }
 
     public Coordinates getHomeCoordinates() {
