@@ -16,7 +16,7 @@ public class TravelTimeUpdater {
         this.notificationService = notificationService;
     }
 
-    @Scheduled(cron = "0 0/50 * * * *")
+    @Scheduled(cron = "0 0/5 * * * *")
     public void updateTravelTimes() {
         try {
             notificationService.updateTravelTimeIfNeeded();
