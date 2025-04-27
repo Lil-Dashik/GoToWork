@@ -26,7 +26,7 @@ spring:
       pool:
         size: 5
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: ${KAFKA_BROKER}
     consumer:
       group-id: crud-service-group
       auto-offset-reset: earliest
@@ -57,3 +57,8 @@ management:
   metrics:
     enable:
       all: true
+  health:
+    db:
+      enabled: true
+    kafka:
+      enabled: true
